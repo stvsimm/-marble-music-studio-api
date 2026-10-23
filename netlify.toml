@@ -1,0 +1,18 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+[[redirects]]
+  from = "/api/midi/analyze"
+  to = "/.netlify/functions/midi-analyze"
+  status = 200
+
+[[redirects]]
+  from = "/api/marbles/generate"
+  to = "/.netlify/functions/marbles-generate"
+  status = 200
