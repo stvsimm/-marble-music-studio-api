@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Marble Music Studio — MIDI to Marble Worlds</title>
+  <meta name="description" content="Turn MIDI note data into the building blocks for synchronized marble-run music animations.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --panel: #141923;
+      --text: #f4f6fb;
+      --muted: #a1aabd;
+      --green: #69f0ae;
+      --purple: #a78bfa;
+      --border: #293244;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 80% 10%, #27204b 0, transparent 35%),
+        radial-gradient(ellipse at 10% 30%, #103c37 0, transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    .wrap {
+      width: min(1080px, 92%);
+      margin: auto;
+    }
+
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .brand span { color: var(--green); }
+
+    .hero {
+      padding: 78px 0 55px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid #3d675b;
+      border-radius: 999px;
+      color: var(--green);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 22px auto;
+      max-width: 800px;
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: -.045em;
+    }
+
+    h1 span {
+      background: linear-gradient(90deg, var(--green), var(--purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .intro {
+      max-width: 680px;
+      margin: 0 auto 28px;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    button {
+      padding: 13px 20px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--green);
+      color: #07120e;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: .7;
+    }
+
+    #status {
+      min-height: 28px;
+      margin-top: 16px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 20px 0 60px;
+    }
+
+    .card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(20, 25, 35, .88);
+    }
+
+    .icon { font-size: 1.8rem; }
+
+    h2 { font-size: 1.25rem; }
+
+    .card p, .note { color: var(--muted); }
+
+    code {
+      color: var(--green);
+      overflow-wrap: anywhere;
+    }
+
+    .api {
+      margin-bottom: 60px;
+      padding: 26px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .endpoint {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .endpoint:last-child { border-bottom: 0; }
+
+    .method {
+      display: inline-block;
+      min-width: 48px;
+      color: var(--green);
+      font-size: .8rem;
+      font-weight: 800;
+    }
+
+    footer {
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap brand">MARBLE <span>MUSIC STUDIO</span></div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="badge">API FOUNDATION · VERSION 0.1</div>
+      <h1>Your music.<br><span>Set in motion.</span></h1>
+      <p class="intro">
+        Build toward realistic marble-run animations driven by MIDI music.
+        Analyze musical note data, map notes to marble scenes, and prepare
+        for synchronized 3D video creation.
+      </p>
+      <button id="check">Check API status</button>
+      <div id="status" role="status" aria-live="polite">
+        Ready to check the API.
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="icon">🎼</div>
+        <h2>1. MIDI data</h2>
+        <p>Start with a Standard MIDI File and validate its basic file structure.</p>
+      </article>
+      <article class="card">
+        <div class="icon">🔮</div>
+        <h2>2. Marble scene data</h2>
+        <p>Map note pitch, timing, duration, and velocity to visual properties.</p>
+      </article>
+      <article class="card">
+        <div class="icon">🎬</div>
+        <h2>3. 3D animation</h2>
+        <p>Future milestone: render and export synchronized marble-run videos.</p>
+      </article>
+    </section>
+
+    <section class="api">
+      <h2>API endpoints</h2>
+      <div class="endpoint">
+        <span class="method">GET</span>
+        <code>/api/health</code>
+        <div class="note">Check service status.</div>
+      </div>
+      <div class="endpoint">
+        <span class="method">POST</span>
+        <code>/api/midi/analyze</code>
+        <div class="note">Validate a base64-encoded MIDI file header.</div>
+      </div>
+      <div class="endpoint">
+        <span class="method">POST</span>
+        <code>/api/marbles/generate</code>
+        <div class="note">Generate scene data from a notes array.</div>
+      </div>
+    </section>
+
+    <p class="note">
+      This is an early prototype. Full MIDI event analysis, 3D rendering,
+      customer API keys, usage metering, and paid plans are not implemented yet.
+    </p>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Marble Music Studio · Early API prototype
+    </div>
+  </footer>
+
+  <script>
+    const button = document.getElementById("check");
+    const status = document.getElementById("status");
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      status.textContent = "Checking API…";
+
+      try {
+        const response = await fetch("/api/health");
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "API check failed");
+        }
+
+        status.textContent =
+          "Connected: " + data.service + " · Version " + data.version;
+      } catch (error) {
+        status.textContent =
+          "Could not reach the API. Deploy the site on Netlify and try again.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
