@@ -1,12 +1,8 @@
-export default async () => {
-  return {
-    statusCode: 200,
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
+export default async (request) => {
+  return new Response(
+    JSON.stringify({
       ok: true,
-      service: "Marble Music Studio API",
+      service: "Midi Marble API",
       version: "0.1.0",
       message: "API is online!",
       endpoints: [
@@ -14,6 +10,13 @@ export default async () => {
         "/api/midi/analyze",
         "/api/marbles/generate"
       ]
-    })
-  };
+    }),
+    {
+      status: 200,
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*"
+      }
+    }
+  );
 };
