@@ -1,90 +1,102 @@
-import {
-  json,
-  methodError,
-  authError,
-  parseBody
-} from "./_shared.mjs";
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "access-control-allow-headers": "content-type, x-api-key",
+      "access-control-allow-methods": "POST, OPTIONS"
+    }
+  });
+}
 
-export default async (event) => {
-  const method = methodError(event, "POST");
-  if (method) return method;
-
-  const auth = authError(event);
-  if (auth) return auth;
-
-  const body = parseBody(event);
-
-  if (!body) {
-    return json(400, {
-      error: "Request body must be valid JSON"
+export default async function (request) {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-headers": "content-type, x-api-key",
+        "access-control-allow-methods": "POST, OPTIONS"
+      }
     });
   }
 
-  if (!Array.isArray(body.notes)) {
-    return json(400, {
-      error: "Provide a notes array from your MIDI analysis"
-    });
+  if (request.method !== "POST") {
+    return json({
+      error: "Use POST with a JSON body."
+    }, 405);
   }
 
-  const maxNotes = 10000;
+  try {
+    const body = await request.json();
 
-  if (body.notes.length > maxNotes) {
-    return json(413, {
-      error: `Too many notes. Maximum: ${maxNotes}`
-    });
-  }
+    const notes = body.notes;
 
-  const marbles = body.notes.map((note, index) => {
-    const pitch = Number(note.pitch);
-    const start = Number(note.start);
-    const duration = Number(note.duration);
-    const velocity = Number(note.velocity ?? 100);
-
-    if (
-      !Number.isFinite(pitch) ||
-      !Number.isFinite(start) ||
-      !Number.isFinite(duration) ||
-      !Number.isFinite(velocity) ||
-      pitch < 0 ||
-      pitch > 127 ||
-      start < 0 ||
-      duration <= 0 ||
-      velocity < 0 ||
-      velocity > 127
-    ) {
-      return null;
+    if (!Array.isArray(notes) || notes.length === 0) {
+      return json({
+        error: "Provide a non-empty notes array."
+      }, 400);
     }
 
-    return {
-      id: index + 1,
-      pitch,
-      start,
-      duration,
-      velocity,
-      // Higher MIDI pitches are placed higher in the scene.
-      height: Math.round((pitch / 127) * 1000) / 1000,
-      // MIDI pitch is mapped to a simple visual lane.
-      lane: pitch % 8,
-      // Velocity controls the suggested marble size.
-      radius: Math.round((0.15 + velocity / 127 * 0.35) * 1000) / 1000
-    };
-  });
+    if (notes.length > 5000) {
+      return json({
+        error: "Maximum 5000 notes per request."
+      }, 400);
+    }
 
-  if (marbles.some((marble) => marble === null)) {
-    return json(400, {
-      error: "Each note needs valid pitch, start, duration, and optional velocity values."
+    const events = [];
+
+    for (let i = 0; i < notes.length; i++) {
+      const note = notes[i];
+
+      if (
+        !Number.isFinite(note.pitch) ||
+        note.pitch < 0 ||
+        note.pitch > 127 ||
+        !Number.isFinite(note.startSeconds) ||
+        note.startSeconds < 0 ||
+        !Number.isFinite(note.durationSeconds) ||
+        note.durationSeconds <= 0
+      ) {
+        return json({
+          error: `Invalid note at index ${i}. Each note needs pitch (0–127), startSeconds (>= 0), and durationSeconds (> 0).`
+        }, 400);
+      }
+
+      events.push({
+        eventId: i + 1,
+        pitch: note.pitch,
+        startSeconds: note.startSeconds,
+        durationSeconds: note.durationSeconds,
+        velocity: Number.isFinite(note.velocity)
+          ? Math.max(0, Math.min(127, note.velocity))
+          : 100,
+        marbleRadius: 0.08 + (note.pitch / 127) * 0.12,
+        impactStrength: Math.max(
+          0.1,
+          Math.min(1, (Number.isFinite(note.velocity) ? note.velocity : 100) / 127)
+        ),
+        track: Number.isInteger(note.track) && note.track >= 0
+          ? note.track
+          : 0
+      });
+    }
+
+    events.sort((a, b) => a.startSeconds - b.startSeconds);
+
+    return json({
+      ok: true,
+      eventCount: events.length,
+      durationSeconds: Math.max(
+        ...events.map(e => e.startSeconds + e.durationSeconds)
+      ),
+      events,
+      message: "Marble event data generated. 3D rendering is not implemented yet."
     });
+  } catch {
+    return json({
+      error: "Request body must be valid JSON."
+    }, 400);
   }
-
-  return json(200, {
-    ok: true,
-    count: marbles.length,
-    units: {
-      start: "seconds",
-      duration: "seconds",
-      pitch: "MIDI note number"
-    },
-    marbles,
-    message: "Marble scene data generated. This endpoint creates scene data, not a rendered 3D video yet."
-  });
-};
+}
