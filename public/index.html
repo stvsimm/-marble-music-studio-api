@@ -3,262 +3,299 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0d12">
-  <title>Marble Music Studio — MIDI to Marble Worlds</title>
-  <meta name="description" content="Turn MIDI note data into the building blocks for synchronized marble-run music animations.">
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0b0d12;
-      --panel: #141923;
-      --text: #f4f6fb;
-      --muted: #a1aabd;
-      --green: #69f0ae;
-      --purple: #a78bfa;
-      --border: #293244;
-    }
+  <meta name="theme-color" content="#101014">
+  <title>Marble Music Studio</title>
 
+  <style>
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background:
-        radial-gradient(ellipse at 80% 10%, #27204b 0, transparent 35%),
-        radial-gradient(ellipse at 10% 30%, #103c37 0, transparent 30%),
-        var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
+      padding: 24px 16px;
+      background: #101014;
+      color: #f5f5fa;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    .wrap {
-      width: min(1080px, 92%);
-      margin: auto;
-    }
-
-    header {
-      padding: 24px 0;
-      border-bottom: 1px solid var(--border);
+    main {
+      max-width: 720px;
+      margin: 0 auto;
     }
 
     .brand {
-      font-size: 1.1rem;
+      color: #8b83ff;
+      font-size: 13px;
       font-weight: 800;
-      letter-spacing: .02em;
-    }
-
-    .brand span { color: var(--green); }
-
-    .hero {
-      padding: 78px 0 55px;
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 6px 12px;
-      border: 1px solid #3d675b;
-      border-radius: 999px;
-      color: var(--green);
-      font-size: .8rem;
-      font-weight: 700;
+      letter-spacing: 3px;
     }
 
     h1 {
-      margin: 22px auto;
-      max-width: 800px;
-      font-size: clamp(2.4rem, 7vw, 5rem);
+      font-size: clamp(34px, 8vw, 56px);
       line-height: 1.05;
-      letter-spacing: -.045em;
+      margin: 18px 0;
     }
 
-    h1 span {
-      background: linear-gradient(90deg, var(--green), var(--purple));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+    h1 span { color: #8b83ff; }
 
     .intro {
-      max-width: 680px;
-      margin: 0 auto 28px;
-      color: var(--muted);
-      font-size: 1.1rem;
+      color: #aaaab8;
+      line-height: 1.7;
+    }
+
+    .card {
+      margin-top: 28px;
+      padding: 22px;
+      border: 1px solid #30303b;
+      border-radius: 18px;
+      background: #19191f;
+    }
+
+    .dropzone {
+      display: block;
+      padding: 30px 16px;
+      border: 2px dashed #57536f;
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+
+    .muted {
+      color: #aaaab8;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      margin-top: 18px;
+      color: #ddd;
     }
 
     button {
-      padding: 13px 20px;
+      width: 100%;
+      padding: 16px;
+      margin-top: 18px;
       border: 0;
-      border-radius: 10px;
-      background: var(--green);
-      color: #07120e;
-      font-weight: 800;
-      font-size: 1rem;
+      border-radius: 12px;
+      background: #7167f5;
+      color: white;
+      font-size: 16px;
+      font-weight: 750;
       cursor: pointer;
     }
 
     button:disabled {
+      opacity: .5;
       cursor: wait;
-      opacity: .7;
     }
 
-    #status {
-      min-height: 28px;
-      margin-top: 16px;
-      color: var(--muted);
+    .status {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #24242d;
       overflow-wrap: anywhere;
+      line-height: 1.6;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      padding: 20px 0 60px;
-    }
+    .success { color: #79e5ad; }
+    .error { color: #ff8585; }
 
-    .card {
-      padding: 24px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(20, 25, 35, .88);
-    }
-
-    .icon { font-size: 1.8rem; }
-
-    h2 { font-size: 1.25rem; }
-
-    .card p, .note { color: var(--muted); }
-
-    code {
-      color: var(--green);
+    pre {
+      padding: 16px;
+      background: #0c0c10;
+      border: 1px solid #30303b;
+      border-radius: 12px;
+      overflow: auto;
+      white-space: pre-wrap;
       overflow-wrap: anywhere;
+      font-size: 12px;
+      line-height: 1.6;
     }
 
-    .api {
-      margin-bottom: 60px;
-      padding: 26px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--panel);
-    }
-
-    .endpoint {
-      padding: 13px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .endpoint:last-child { border-bottom: 0; }
-
-    .method {
-      display: inline-block;
-      min-width: 48px;
-      color: var(--green);
-      font-size: .8rem;
-      font-weight: 800;
-    }
+    .hidden { display: none; }
 
     footer {
-      padding: 24px 0;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: .85rem;
+      margin-top: 30px;
+      color: #858593;
+      font-size: 12px;
+      line-height: 1.7;
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <div class="wrap brand">MARBLE <span>MUSIC STUDIO</span></div>
-  </header>
+<main>
+  <div class="brand">MMS / MARBLE MUSIC STUDIO</div>
 
-  <main class="wrap">
-    <section class="hero">
-      <div class="badge">API FOUNDATION · VERSION 0.1</div>
-      <h1>Your music.<br><span>Set in motion.</span></h1>
-      <p class="intro">
-        Build toward realistic marble-run animations driven by MIDI music.
-        Analyze musical note data, map notes to marble scenes, and prepare
-        for synchronized 3D video creation.
+  <h1>Turn your MIDI into <span>marble events.</span></h1>
+
+  <p class="intro">
+    Upload a MIDI file. Prepare its musical data for a
+    realistic 3D marble-run animation.
+  </p>
+
+  <section class="card">
+    <h2>01 / Upload MIDI</h2>
+
+    <label class="dropzone" for="midiFile">
+      <div class="icon">🎹</div>
+      <strong>Choose a MIDI file</strong>
+      <p class="muted">
+        Tap below to browse files on your iPhone.
       </p>
-      <button id="check">Check API status</button>
-      <div id="status" role="status" aria-live="polite">
-        Ready to check the API.
-      </div>
-    </section>
+      <input
+        id="midiFile"
+        type="file"
+        accept=".mid,.midi,audio/midi,audio/x-midi"
+      >
+    </label>
 
-    <section class="grid">
-      <article class="card">
-        <div class="icon">🎼</div>
-        <h2>1. MIDI data</h2>
-        <p>Start with a Standard MIDI File and validate its basic file structure.</p>
-      </article>
-      <article class="card">
-        <div class="icon">🔮</div>
-        <h2>2. Marble scene data</h2>
-        <p>Map note pitch, timing, duration, and velocity to visual properties.</p>
-      </article>
-      <article class="card">
-        <div class="icon">🎬</div>
-        <h2>3. 3D animation</h2>
-        <p>Future milestone: render and export synchronized marble-run videos.</p>
-      </article>
-    </section>
+    <div id="fileInfo" class="status muted">
+      No MIDI file selected.
+    </div>
 
-    <section class="api">
-      <h2>API endpoints</h2>
-      <div class="endpoint">
-        <span class="method">GET</span>
-        <code>/api/health</code>
-        <div class="note">Check service status.</div>
-      </div>
-      <div class="endpoint">
-        <span class="method">POST</span>
-        <code>/api/midi/analyze</code>
-        <div class="note">Validate a base64-encoded MIDI file header.</div>
-      </div>
-      <div class="endpoint">
-        <span class="method">POST</span>
-        <code>/api/marbles/generate</code>
-        <div class="note">Generate scene data from a notes array.</div>
-      </div>
-    </section>
+    <button id="analyzeButton" disabled>
+      Analyze MIDI →
+    </button>
 
-    <p class="note">
-      This is an early prototype. Full MIDI event analysis, 3D rendering,
-      customer API keys, usage metering, and paid plans are not implemented yet.
+    <div id="status" class="status" aria-live="polite">
+      Ready for your MIDI file.
+    </div>
+  </section>
+
+  <section id="results" class="card hidden">
+    <h2>02 / Analysis Results</h2>
+    <p class="muted">
+      Response received from the Marble Music Studio API.
     </p>
-  </main>
+    <pre id="output"></pre>
+  </section>
 
   <footer>
-    <div class="wrap">
-      Marble Music Studio · Early API prototype
-    </div>
+    MARBLE MUSIC STUDIO API · PROTOTYPE 0.1.0<br>
+    This prototype validates MIDI uploads. Full MIDI note
+    extraction and 3D video rendering are still under development.
   </footer>
+</main>
 
-  <script>
-    const button = document.getElementById("check");
-    const status = document.getElementById("status");
+<script>
+  const fileInput = document.getElementById("midiFile");
+  const fileInfo = document.getElementById("fileInfo");
+  const analyzeButton = document.getElementById("analyzeButton");
+  const statusBox = document.getElementById("status");
+  const results = document.getElementById("results");
+  const output = document.getElementById("output");
 
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      status.textContent = "Checking API…";
+  let selectedFile = null;
 
-      try {
-        const response = await fetch("/api/health");
-        const data = await response.json();
+  function showStatus(message, type = "") {
+    statusBox.className = "status " + type;
+    statusBox.textContent = message;
+  }
 
-        if (!response.ok || !data.ok) {
-          throw new Error(data.error || "API check failed");
-        }
+  fileInput.addEventListener("change", () => {
+    selectedFile = fileInput.files[0] || null;
+    results.classList.add("hidden");
+    output.textContent = "";
 
-        status.textContent =
-          "Connected: " + data.service + " · Version " + data.version;
-      } catch (error) {
-        status.textContent =
-          "Could not reach the API. Deploy the site on Netlify and try again.";
-      } finally {
-        button.disabled = false;
+    if (!selectedFile) {
+      fileInfo.textContent = "No MIDI file selected.";
+      analyzeButton.disabled = true;
+      return;
+    }
+
+    const validExtension = /\.(mid|midi)$/i.test(selectedFile.name);
+
+    if (!validExtension) {
+      fileInfo.textContent = "Please select a .mid or .midi file.";
+      analyzeButton.disabled = true;
+      showStatus("Unsupported file type.", "error");
+      return;
+    }
+
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      fileInfo.textContent = "File exceeds the 5 MB prototype limit.";
+      analyzeButton.disabled = true;
+      showStatus("Choose a smaller MIDI file.", "error");
+      return;
+    }
+
+    fileInfo.textContent =
+      selectedFile.name + " · " +
+      (selectedFile.size / 1024).toFixed(1) + " KB";
+
+    analyzeButton.disabled = false;
+    showStatus("File selected. Ready to analyze.");
+  });
+
+  analyzeButton.addEventListener("click", async () => {
+    if (!selectedFile) return;
+
+    analyzeButton.disabled = true;
+    results.classList.add("hidden");
+    showStatus("Reading MIDI file…");
+
+    try {
+      const buffer = await selectedFile.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+
+      if (
+        bytes.length < 14 ||
+        String.fromCharCode(...bytes.slice(0, 4)) !== "MThd"
+      ) {
+        throw new Error(
+          "This file does not appear to be a valid Standard MIDI File."
+        );
       }
-    });
-  </script>
+
+      showStatus("Encoding MIDI and contacting the API…");
+
+      // Convert bytes to Base64 in manageable chunks.
+      let binary = "";
+      const chunkSize = 32768;
+
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(
+          ...bytes.subarray(i, i + chunkSize)
+        );
+      }
+
+      const midiBase64 = btoa(binary);
+
+      const response = await fetch("/api/midi/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ midiBase64 })
+      });
+
+      const data = await response.json();
+
+      results.classList.remove("hidden");
+      output.textContent = JSON.stringify(data, null, 2);
+
+      if (!response.ok) {
+        throw new Error(data.error || "The API request failed.");
+      }
+
+      showStatus(
+        "Upload successful. The API accepted your MIDI file.",
+        "success"
+      );
+    } catch (error) {
+      showStatus(error.message || "Something went wrong.", "error");
+    } finally {
+      analyzeButton.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
