@@ -1,33 +1,755 @@
-/* 3D Marble Visualizer */
-#visualizer {
-  width: 100%;
-  height: 340px;
-  position: relative;
-  overflow: hidden;
-  border-radius: 14px;
-  background: #080a14;
-  border: 1px solid #39364f;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101014">
+  <title>Marble Music Studio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: #101014;
+      color: #f5f5fa;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .brand {
+      color: #8b83ff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 3px;
+    }
+    h1 {
+      font-size: clamp(34px, 8vw, 56px);
+      line-height: 1.05;
+      margin: 18px 0;
+    }
+    h1 span {
+      color: #8b83ff;
+    }
+    h2 {
+      font-size: 22px;
+      margin-top: 0;
+    }
+    .intro {
+      color: #aaaab8;
+      line-height: 1.7;
+    }
+    .card {
+      margin-top: 28px;
+      padding: 22px;
+      border: 1px solid #30303b;
+      border-radius: 18px;
+      background: #19191f;
+    }
+    .dropzone {
+      display: block;
+      padding: 30px 16px;
+      border: 2px dashed #57536f;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+    .muted {
+      color: #aaaab8;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      margin-top: 18px;
+      color: #ddd;
+    }
+    button {
+      width: 100%;
+      padding: 16px;
+      margin-top: 18px;
+      border: 0;
+      border-radius: 12px;
+      background: #7167f5;
+      color: white;
+      font-size: 16px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: .5;
+      cursor: wait;
+    }
+    .status {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #24242d;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
+    }
+    .success {
+      color: #79e5ad;
+    }
+    .error {
+      color: #ff8585;
+    }
+    pre {
+      padding: 16px;
+      background: #0c0c10;
+      border: 1px solid #30303b;
+      border-radius: 12px;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+      line-height: 1.6;
+      max-height: 420px;
+    }
+    .hidden {
+      display: none !important;
+    }
+    #visualizer {
+      width: 100%;
+      height: 360px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      background: #080a14;
+      border: 1px solid #39364f;
+    }
+    #visualizer canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .visualizer-controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .visualizer-controls button {
+      padding: 13px 6px;
+      font-size: 14px;
+    }
+    #playbackStatus {
+      color: #aaaab8;
+      font-size: 13px;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 18px 0;
+    }
+    .stat {
+      background: #24242d;
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+    .stat strong {
+      display: block;
+      font-size: 20px;
+      color: #aaa3ff;
+    }
+    .stat span {
+      color: #aaaab8;
+      font-size: 11px;
+    }
+    footer {
+      margin-top: 30px;
+      color: #858593;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    @media (max-width: 420px) {
+      .card {
+        padding: 17px;
+      }
+      #visualizer {
+        height: 300px;
+      }
+      .visualizer-controls button {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">MMS / MARBLE MUSIC STUDIO</div>
+  <h1>Turn your MIDI into <span>marble music.</span></h1>
+  <p class="intro">
+    Upload a MIDI file, extract its musical notes, and watch
+    your notes become a 3D marble-run animation.
+  </p>
+  <!-- 01: MIDI UPLOAD -->
+  <section class="card">
+    <h2>01 / Upload MIDI</h2>
+    <label class="dropzone" for="midiFile">
+      <div class="icon">🎹</div>
+      <strong>Choose a MIDI file</strong>
+      <p class="muted">
+        Browse MIDI files stored on your iPhone.
+      </p>
+      <input
+        id="midiFile"
+        type="file"
+        accept=".mid,.midi,audio/midi,audio/x-midi"
+      >
+    </label>
+    <div id="fileInfo" class="status muted">
+      No MIDI file selected.
+    </div>
+    <button id="analyzeButton" disabled>
+      Analyze MIDI →
+    </button>
+    <div id="status" class="status" aria-live="polite">
+      Ready for your MIDI file.
+    </div>
+  </section>
+  <!-- 02: ANALYSIS -->
+  <section id="results" class="card hidden">
+    <h2>02 / Analysis Results</h2>
+    <div class="stats">
+      <div class="stat">
+        <strong id="noteCount">0</strong>
+        <span>NOTES</span>
+      </div>
+      <div class="stat">
+        <strong id="trackCount">0</strong>
+        <span>TRACKS</span>
+      </div>
+      <div class="stat">
+        <strong id="songDuration">0s</strong>
+        <span>DURATION</span>
+      </div>
+    </div>
+    <p class="muted">
+      Musical note data returned by the Marble Music Studio API.
+    </p>
+    <details>
+      <summary>View MIDI analysis JSON</summary>
+      <pre id="output"></pre>
+    </details>
+  </section>
+  <!-- 03: 3D MARBLE VISUALIZER -->
+  <section id="marbleSection" class="card hidden">
+    <h2>03 / Marble Run</h2>
+    <p class="muted">
+      Watch the notes from your MIDI file move through a 3D
+      marble scene. The preview uses the first 30 seconds.
+    </p>
+    <div id="visualizer"></div>
+    <div class="visualizer-controls">
+      <button id="playButton">▶ Play</button>
+      <button id="pauseButton">Ⅱ Pause</button>
+      <button id="restartButton">↻ Restart</button>
+    </div>
+    <div id="playbackStatus" aria-live="polite">
+      Analyze a MIDI file to build your marble scene.
+    </div>
+  </section>
+  <footer>
+    MARBLE MUSIC STUDIO · PROTOTYPE 0.2.0<br>
+    MIDI analysis and interactive 3D preview.
+    Audio synchronization and video export are future stages.
+  </footer>
+</main>
+<script type="module">
+import * as THREE from
+  "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
+/* ================================================
+   ELEMENTS AND APPLICATION STATE
+================================================ */
+const fileInput = document.getElementById("midiFile");
+const fileInfo = document.getElementById("fileInfo");
+const analyzeButton = document.getElementById("analyzeButton");
+const statusBox = document.getElementById("status");
+const results = document.getElementById("results");
+const output = document.getElementById("output");
+const noteCountElement = document.getElementById("noteCount");
+const trackCountElement = document.getElementById("trackCount");
+const songDurationElement = document.getElementById("songDuration");
+const section = document.getElementById("marbleSection");
+const mount = document.getElementById("visualizer");
+const playbackStatus = document.getElementById("playbackStatus");
+const playButton = document.getElementById("playButton");
+const pauseButton = document.getElementById("pauseButton");
+const restartButton = document.getElementById("restartButton");
+let selectedFile = null;
+let latestNotes = [];
+let scene = null;
+let camera = null;
+let renderer = null;
+let resizeObserver = null;
+let marbles = [];
+let playing = false;
+let startTime = 0;
+let elapsedBeforePause = 0;
+let previewDuration = 30;
+let animationFrame = null;
+let disposed = false;
+/* ================================================
+   STATUS AND UPLOAD
+================================================ */
+function showStatus(message, type = "") {
+  statusBox.className = "status " + type;
+  statusBox.textContent = message;
 }
-
-#visualizer canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+fileInput.addEventListener("change", () => {
+  selectedFile = fileInput.files?.[0] || null;
+  results.classList.add("hidden");
+  section.classList.add("hidden");
+  latestNotes = [];
+  stopPlayback();
+  clearMarbles();
+  if (!selectedFile) {
+    fileInfo.textContent = "No MIDI file selected.";
+    analyzeButton.disabled = true;
+    showStatus("Choose a MIDI file to begin.");
+    return;
+  }
+  if (!/\.(mid|midi)$/i.test(selectedFile.name)) {
+    fileInfo.textContent = "Please select a .mid or .midi file.";
+    analyzeButton.disabled = true;
+    showStatus("Unsupported file type.", "error");
+    return;
+  }
+  if (selectedFile.size > 5 * 1024 * 1024) {
+    fileInfo.textContent = "File exceeds the 5 MB prototype limit.";
+    analyzeButton.disabled = true;
+    showStatus("Choose a smaller MIDI file.", "error");
+    return;
+  }
+  fileInfo.textContent =
+    selectedFile.name + " · " +
+    (selectedFile.size / 1024).toFixed(1) + " KB";
+  analyzeButton.disabled = false;
+  showStatus("File selected. Ready to analyze.");
+});
+analyzeButton.addEventListener("click", analyzeMidi);
+async function analyzeMidi() {
+  if (!selectedFile) return;
+  analyzeButton.disabled = true;
+  results.classList.add("hidden");
+  section.classList.add("hidden");
+  showStatus("Reading MIDI file…");
+  try {
+    const buffer = await selectedFile.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    if (
+      bytes.length < 14 ||
+      String.fromCharCode(...bytes.subarray(0, 4)) !== "MThd"
+    ) {
+      throw new Error(
+        "This file does not appear to be a valid Standard MIDI File."
+      );
+    }
+    showStatus("Encoding MIDI and contacting the API…");
+    // Encode the file as Base64 without spreading the entire file
+    // into a single function call.
+    let binary = "";
+    const chunkSize = 32768;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(
+        ...bytes.subarray(i, i + chunkSize)
+      );
+    }
+    const midiBase64 = btoa(binary);
+    const response = await fetch("/api/midi/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ midiBase64 })
+    });
+    const data = await response.json();
+    if (!response.ok || data.ok !== true) {
+      throw new Error(data.error || "MIDI analysis failed.");
+    }
+    if (!Array.isArray(data.notes)) {
+      throw new Error(
+        "The API responded, but its note data is missing."
+      );
+    }
+    latestNotes = data.notes;
+    // Keep the visible results compact. The complete response
+    // remains available in the expandable JSON panel.
+    output.textContent = JSON.stringify(data, null, 2);
+    noteCountElement.textContent =
+      Number(data.noteCount ?? data.notes.length).toLocaleString();
+    trackCountElement.textContent =
+      String(data.trackCount ?? "—");
+    songDurationElement.textContent =
+      Number(data.durationSeconds || 0).toFixed(1) + "s";
+    results.classList.remove("hidden");
+    showStatus(
+      `Analysis successful: ${latestNotes.length.toLocaleString()} notes extracted.`,
+      "success"
+    );
+    if (latestNotes.length === 0) {
+      showStatus(
+        "The MIDI file was read, but no complete notes were extracted.",
+        "error"
+      );
+      return;
+    }
+    // Build the 3D preview using the real API note data.
+    createMarblePreview(latestNotes);
+  } catch (error) {
+    console.error("MIDI analysis error:", error);
+    showStatus(
+      error.message || "Something went wrong while analyzing MIDI.",
+      "error"
+    );
+  } finally {
+    analyzeButton.disabled = false;
+  }
 }
-
-.visualizer-controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+/* ================================================
+   THREE.JS SCENE
+================================================ */
+function initializeScene() {
+  if (renderer) return;
+  if (!mount.clientWidth || !mount.clientHeight) {
+    throw new Error("The 3D preview area is not visible.");
+  }
+  disposed = false;
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x080a14);
+  camera = new THREE.PerspectiveCamera(
+    45,
+    mount.clientWidth / mount.clientHeight,
+    0.1,
+    100
+  );
+  camera.position.set(0, 7, 17);
+  camera.lookAt(0, 0, 0);
+  try {
+    renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false
+    });
+  } catch (error) {
+    throw new Error(
+      "Your browser could not start WebGL. Try updating your browser or using another device."
+    );
+  }
+  renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio || 1, 1.5)
+  );
+  renderer.setSize(
+    mount.clientWidth,
+    mount.clientHeight
+  );
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  mount.replaceChildren(renderer.domElement);
+  scene.add(new THREE.HemisphereLight(
+    0xe0e3ff,
+    0x292033,
+    2.2
+  ));
+  const keyLight = new THREE.DirectionalLight(0xffffff, 3);
+  keyLight.position.set(4, 10, 8);
+  scene.add(keyLight);
+  const fillLight = new THREE.PointLight(0x7766ff, 24, 30);
+  fillLight.position.set(-5, 4, 4);
+  scene.add(fillLight);
+  // Main track platform.
+  const platform = new THREE.Mesh(
+    new THREE.BoxGeometry(14, 0.35, 4),
+    new THREE.MeshStandardMaterial({
+      color: 0x28283b,
+      metalness: 0.55,
+      roughness: 0.4
+    })
+  );
+  platform.position.set(0, -1.8, 0);
+  scene.add(platform);
+  // Raised rails.
+  for (const z of [-1.8, 1.8]) {
+    const rail = new THREE.Mesh(
+      new THREE.BoxGeometry(14, 0.45, 0.16),
+      new THREE.MeshStandardMaterial({
+        color: 0x756cff,
+        metalness: 0.65,
+        roughness: 0.25,
+        emissive: 0x17104c
+      })
+    );
+    rail.position.set(0, -1.45, z);
+    scene.add(rail);
+  }
+  // Track markings.
+  for (let i = 0; i < 15; i++) {
+    const x = -6.5 + i * (13 / 14);
+    const marker = new THREE.Mesh(
+      new THREE.BoxGeometry(0.025, 0.025, 3.3),
+      new THREE.MeshBasicMaterial({
+        color: 0x646080
+      })
+    );
+    marker.position.set(x, -1.59, 0);
+    scene.add(marker);
+  }
+  resizeObserver = new ResizeObserver(() => {
+    if (
+      !renderer ||
+      !camera ||
+      !mount.clientWidth ||
+      !mount.clientHeight
+    ) {
+      return;
+    }
+    camera.aspect = mount.clientWidth / mount.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(
+      mount.clientWidth,
+      mount.clientHeight
+    );
+  });
+  resizeObserver.observe(mount);
 }
-
-.visualizer-controls button {
-  flex: 1;
-  min-width: 90px;
+/* ================================================
+   MARBLE CREATION
+================================================ */
+function clearMarbles() {
+  if (!scene) {
+    marbles = [];
+    return;
+  }
+  for (const item of marbles) {
+    scene.remove(item.mesh);
+    item.mesh.geometry.dispose();
+    item.mesh.material.dispose();
+  }
+  marbles = [];
 }
-
-#playbackStatus {
-  color: #aaaab8;
-  font-size: 13px;
-  margin-top: 12px;
+function createMarblePreview(notes) {
+  stopPlayback();
+  section.classList.remove("hidden");
+  try {
+    initializeScene();
+    clearMarbles();
+    // Limit the first preview to 500 notes for mobile performance.
+    const visibleNotes = notes
+      .filter(note =>
+        Number.isFinite(note.startSeconds) &&
+        Number.isFinite(note.pitch) &&
+        note.startSeconds >= 0 &&
+        note.startSeconds < 30
+      )
+      .slice(0, 500);
+    if (visibleNotes.length === 0) {
+      playbackStatus.textContent =
+        "No notes occur in the first 30 seconds.";
+      renderFrame(0);
+      return;
+    }
+    previewDuration = Math.min(
+      30,
+      Math.max(
+        1,
+        ...visibleNotes.map(note =>
+          note.startSeconds +
+          Math.max(0.1, note.durationSeconds || 0.2)
+        )
+      )
+    );
+    const sphereGeometry = new THREE.SphereGeometry(
+      1,
+      18,
+      14
+    );
+    for (const note of visibleNotes) {
+      const pitch = Math.max(
+        0,
+        Math.min(127, note.pitch)
+      );
+      const velocity = Math.max(
+        1,
+        Math.min(127, note.velocity || 64)
+      );
+      // Pitch maps to a lane across the track.
+      const x = (pitch / 127) * 12 - 6;
+      // Velocity determines marble size.
+      const radius = 0.09 + (velocity / 127) * 0.16;
+      // Different pitches produce different colors.
+      const hue = (pitch % 24) / 24;
+      const color = new THREE.Color().setHSL(
+        hue,
+        0.82,
+        0.58
+      );
+      const material = new THREE.MeshStandardMaterial({
+        color,
+        metalness: 0.55,
+        roughness: 0.22,
+        emissive: color.clone().multiplyScalar(0.12)
+      });
+      const mesh = new THREE.Mesh(
+        sphereGeometry,
+        material
+      );
+      mesh.scale.setScalar(radius);
+      mesh.position.set(x, 3, 0);
+      scene.add(mesh);
+      marbles.push({
+        mesh,
+        x,
+        radius,
+        velocity,
+        pitch,
+        start: note.startSeconds,
+        noteDuration: Math.max(
+          0.08,
+          note.durationSeconds || 0.2
+        )
+      });
+    }
+    elapsedBeforePause = 0;
+    startTime = performance.now();
+    playbackStatus.textContent =
+      `${visibleNotes.length} marbles ready · ` +
+      `${previewDuration.toFixed(1)} seconds · ` +
+      "Press Play to start.";
+    renderFrame(0);
+  } catch (error) {
+    console.error("3D preview error:", error);
+    playbackStatus.textContent =
+      error.message || "Could not create the 3D preview.";
+  }
 }
+/* ================================================
+   ANIMATION
+================================================ */
+function renderFrame(time) {
+  if (!renderer || !scene) return;
+  const t = Math.max(0, time);
+  for (const item of marbles) {
+    const age = t - item.start;
+    if (age < 0) {
+      // Waiting above the track until the note begins.
+      item.mesh.visible = true;
+      item.mesh.position.set(item.x, 3, 0);
+      continue;
+    }
+    if (age > item.noteDuration + 1.5) {
+      item.mesh.visible = false;
+      continue;
+    }
+    item.mesh.visible = true;
+    const fallDuration = 0.65;
+    const progress = Math.min(1, age / fallDuration);
+    const fall = 3 - progress * 4.45;
+    const bounceAge = Math.max(0, age - fallDuration);
+    const bounce = progress >= 1
+      ? Math.abs(Math.sin(bounceAge * 8)) *
+        Math.exp(-bounceAge * 2) *
+        (item.velocity / 127) *
+        0.65
+      : 0;
+    // Animate the marble's fall and bounce.
+    item.mesh.position.set(
+      item.x,
+      Math.max(-1.25, fall + bounce),
+      0
+    );
+    item.mesh.rotation.x = age * 4;
+    item.mesh.rotation.z = age * 2;
+  }
+  renderer.render(scene, camera);
+}
+function stopPlayback() {
+  playing = false;
+  if (animationFrame !== null) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+  }
+  if (playButton) {
+    playButton.textContent = "▶ Play";
+  }
+}
+function animate() {
+  if (!playing || disposed) return;
+  const elapsed =
+    elapsedBeforePause +
+    (performance.now() - startTime) / 1000;
+  renderFrame(elapsed);
+  playbackStatus.textContent =
+    `Playing · ${Math.min(elapsed, previewDuration).toFixed(1)} / ` +
+    `${previewDuration.toFixed(1)} seconds`;
+  if (elapsed >= previewDuration) {
+    stopPlayback();
+    elapsedBeforePause = 0;
+    renderFrame(0);
+    playbackStatus.textContent =
+      "Preview complete. Press Play to replay.";
+    return;
+  }
+  animationFrame = requestAnimationFrame(animate);
+}
+/* ================================================
+   PLAYBACK CONTROLS
+================================================ */
+playButton.addEventListener("click", () => {
+  if (!marbles.length) {
+    playbackStatus.textContent =
+      "Analyze a MIDI file first.";
+    return;
+  }
+  if (playing) return;
+  if (elapsedBeforePause >= previewDuration) {
+    elapsedBeforePause = 0;
+  }
+  playing = true;
+  startTime = performance.now();
+  playButton.textContent = "▶ Playing";
+  animate();
+});
+pauseButton.addEventListener("click", () => {
+  if (!playing) return;
+  elapsedBeforePause +=
+    (performance.now() - startTime) / 1000;
+  stopPlayback();
+  playbackStatus.textContent =
+    `Paused at ${elapsedBeforePause.toFixed(1)} seconds.`;
+});
+restartButton.addEventListener("click", () => {
+  stopPlayback();
+  elapsedBeforePause = 0;
+  renderFrame(0);
+  playbackStatus.textContent =
+    "Preview restarted. Press Play to begin.";
+});
+/* ================================================
+   PAGE CLEANUP
+================================================ */
+window.addEventListener("pagehide", () => {
+  stopPlayback();
+  disposed = true;
+  resizeObserver?.disconnect();
+  if (renderer) {
+    renderer.dispose();
+    renderer.domElement.remove();
+    renderer = null;
+  }
+  scene = null;
+  camera = null;
+  marbles = [];
+});
+</script>
+</body>
+</html>
